@@ -32,7 +32,7 @@ final class MockXcodeBuildController: XcodeBuildControlling {
     }
 
     var testStub: (
-        (XcodeBuildTarget, String, Bool, XcodeBuildDestination, AbsolutePath?, AbsolutePath?, [XcodeBuildArgument], Int, [String])
+        (XcodeBuildTarget, String, Bool, XcodeBuildDestination, AbsolutePath?, AbsolutePath?, [XcodeBuildArgument], Int, String?, [String], [String], [String], [String], [String])
             -> [SystemEvent<XcodeBuildOutput>]
     )?
     var testErrorStub: Error?
@@ -45,10 +45,15 @@ final class MockXcodeBuildController: XcodeBuildControlling {
         resultBundlePath: AbsolutePath?,
         arguments: [XcodeBuildArgument],
         retryCount: Int,
+        testPlan: String?,
+        onlyTesting: [String],
+        skipTesting: [String],
+        onlyTestConfiguration: [String],
+        skipTestConfiguration: [String],
         additionalParameters: [String]
     ) -> AsyncThrowingStream<SystemEvent<XcodeBuildOutput>, Error> {
         if let testStub = testStub {
-            let results = testStub(target, scheme, clean, destination, derivedDataPath, resultBundlePath, arguments, retryCount, additionalParameters)
+            let results = testStub(target, scheme, clean, destination, derivedDataPath, resultBundlePath, arguments, retryCount, testPlan, onlyTesting, skipTesting, onlyTestConfiguration, skipTestConfiguration, additionalParameters)
             if let testErrorStub = testErrorStub {
                 return AsyncThrowingStream {
                     throw testErrorStub

@@ -43,6 +43,11 @@ public protocol XcodeBuildControlling {
         resultBundlePath: AbsolutePath?,
         arguments: [XcodeBuildArgument],
         retryCount: Int,
+        testPlan: String?,
+        onlyTesting: [String],
+        skipTesting: [String],
+        onlyTestConfiguration: [String],
+        skipTestConfiguration: [String],
         additionalParameters: [String]
     ) -> AsyncThrowingStream<SystemEvent<XcodeBuildOutput>, Error>
 

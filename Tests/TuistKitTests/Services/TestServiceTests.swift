@@ -108,7 +108,7 @@ final class TestServiceTests: TuistUnitTestCase {
                 Scheme.test(name: "TestScheme"),
             ]
         }
-        buildGraphInspector.testableTargetStub = { scheme, _ in
+        buildGraphInspector.testableTargetStub = { scheme, _, _ in
             GraphTarget.test(
                 target: Target.test(
                     name: scheme.name
@@ -119,7 +119,7 @@ final class TestServiceTests: TuistUnitTestCase {
             (path, Graph.test())
         }
         var testedSchemes: [String] = []
-        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _ in
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
             testedSchemes.append(scheme)
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -151,7 +151,7 @@ final class TestServiceTests: TuistUnitTestCase {
             (path, Graph.test())
         }
         var testedSchemes: [String] = []
-        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _ in
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
             testedSchemes.append(scheme)
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -200,7 +200,7 @@ final class TestServiceTests: TuistUnitTestCase {
             (path, Graph.test())
         }
         var testedSchemes: [String] = []
-        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _ in
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
             testedSchemes.append(scheme)
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -239,7 +239,7 @@ final class TestServiceTests: TuistUnitTestCase {
         }
         var testedSchemes: [String] = []
         xcodebuildController.testErrorStub = NSError.test()
-        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _ in
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
             testedSchemes.append(scheme)
             return []
         }
@@ -274,7 +274,7 @@ final class TestServiceTests: TuistUnitTestCase {
             (path, Graph.test())
         }
         var testedSchemes: [String] = []
-        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _ in
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
             testedSchemes.append(scheme)
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -294,7 +294,7 @@ final class TestServiceTests: TuistUnitTestCase {
         let expectedResourceBundlePath = try AbsolutePath(validating: "/test")
         var resourceBundlePath: AbsolutePath?
 
-        xcodebuildController.testStub = { _, _, _, _, _, gotResourceBundlePath, _, _, _ in
+        xcodebuildController.testStub = { _, _, _, _, _, gotResourceBundlePath, _, _, _, _, _, _, _, _ in
             resourceBundlePath = gotResourceBundlePath
             return []
         }
@@ -325,7 +325,7 @@ final class TestServiceTests: TuistUnitTestCase {
         let expectedResourceBundlePath = try AbsolutePath(validating: "/test")
         var resourceBundlePath: AbsolutePath?
 
-        xcodebuildController.testStub = { _, _, _, _, _, gotResourceBundlePath, _, _, _ in
+        xcodebuildController.testStub = { _, _, _, _, _, gotResourceBundlePath, _, _, _, _, _, _, _, _ in
             resourceBundlePath = gotResourceBundlePath
             return []
         }
@@ -370,7 +370,7 @@ final class TestServiceTests: TuistUnitTestCase {
         }
 
         var passedRetryCount = 0
-        xcodebuildController.testStub = { _, _, _, _, _, _, _, retryCount, _ in
+        xcodebuildController.testStub = { _, _, _, _, _, _, _, retryCount, _, _, _, _, _, _ in
             passedRetryCount = retryCount
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -403,7 +403,7 @@ final class TestServiceTests: TuistUnitTestCase {
         }
 
         var passedRetryCount = -1
-        xcodebuildController.testStub = { _, _, _, _, _, _, _, retryCount, _ in
+        xcodebuildController.testStub = { _, _, _, _, _, _, _, retryCount, _, _, _, _, _, _ in
             passedRetryCount = retryCount
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -416,6 +416,95 @@ final class TestServiceTests: TuistUnitTestCase {
 
         // Then
         XCTAssertEqual(passedRetryCount, 0)
+    }
+
+    func test_run_test_plan_success() async throws {
+        // Given
+        let testPlan = "TestPlan"
+        let testPlanPath = try AbsolutePath(validating: "/testPlan/\(testPlan)")
+        buildGraphInspector.testableSchemesStub = { _ in
+            [
+                Scheme.test(name: "App-Workspace"),
+                Scheme.test(
+                    name: "TestScheme",
+                    testAction: .test(
+                        testPlans: [.init(path: testPlanPath, isDefault: true)]
+                    )
+                ),
+            ]
+        }
+        var passedTestPlan: String?
+        buildGraphInspector.testableTargetStub = { scheme, testPlan, _ in
+            passedTestPlan = testPlan
+            return GraphTarget.test(
+                target: Target.test(
+                    name: scheme.name
+                )
+            )
+        }
+        generator.generateWithGraphStub = { path in
+            (path, Graph.test())
+        }
+        var testedSchemes: [String] = []
+        xcodebuildController.testStub = { _, scheme, _, _, _, _, _, _, _, _, _, _, _, _ in
+            testedSchemes.append(scheme)
+            return [.standardOutput(.init(raw: "success"))]
+        }
+
+        // When
+        try await subject.testRun(
+            schemeName: "TestScheme",
+            path: try temporaryPath(),
+            testPlan: testPlan
+        )
+
+        // Then
+        XCTAssertEqual(testedSchemes, ["TestScheme"])
+        XCTAssertEqual(passedTestPlan, testPlan)
+    }
+
+    func test_run_test_plan_failure() async throws {
+        // Given
+        let testPlan = "TestPlan"
+        let testPlanPath = try AbsolutePath(validating: "/testPlan/\(testPlan)")
+        buildGraphInspector.testableSchemesStub = { _ in
+            [
+                Scheme.test(name: "App-Workspace"),
+                Scheme.test(
+                    name: "TestScheme",
+                    testAction: .test(
+                        testPlans: [.init(path: testPlanPath, isDefault: true)]
+                    )
+                ),
+            ]
+        }
+        buildGraphInspector.workspaceSchemesStub = { _ in
+            [
+                Scheme.test(name: "ProjectSchemeOne"),
+            ]
+        }
+        generator.generateWithGraphStub = { path in
+            (path, Graph.test())
+        }
+        xcodebuildController.testStub = { _, _, _, _, _, _, _, _, _, _, _, _, _, _ in
+            return [.standardOutput(.init(raw: "success"))]
+        }
+
+        let notDefinedTestPlan = "NotDefined"
+        do {
+            // When
+            try await subject.testRun(
+                schemeName: "TestScheme",
+                path: try temporaryPath(),
+                testPlan: notDefinedTestPlan
+            )
+        } catch let TestServiceError.testPlanNotFound(_, passedTestPlan, existing) {
+            // Then
+            XCTAssertEqual(passedTestPlan, notDefinedTestPlan)
+            XCTAssertEqual(existing, [testPlan])
+        } catch {
+            throw error
+        }
     }
 
     func test_run_passes_additional_parameters_as_argument() async throws {
@@ -435,7 +524,7 @@ final class TestServiceTests: TuistUnitTestCase {
         }
 
         var passedAdditionalParameters: [String]?
-        xcodebuildController.testStub = { _, _, _, _, _, _, _, _, additionalParameters in
+        xcodebuildController.testStub = { _, _, _, _, _, _, _, _, _, _, _, _, _, additionalParameters in
             passedAdditionalParameters = additionalParameters
             return [.standardOutput(.init(raw: "success"))]
         }
@@ -466,6 +555,11 @@ extension TestService {
         skipUiTests: Bool = false,
         resultBundlePath: AbsolutePath? = nil,
         retryCount: Int = 0,
+        testPlan: String? = nil,
+        onlyTesting: [String] = [],
+        skipTesting: [String] = [],
+        onlyTestConfiguration: [String] = [],
+        skipTestConfiguration: [String] = [],
         additionalParameters: [String] = []
     ) async throws {
         try await run(
@@ -478,6 +572,11 @@ extension TestService {
             skipUITests: skipUiTests,
             resultBundlePath: resultBundlePath,
             retryCount: retryCount,
+            testPlan: testPlan,
+            onlyTesting: onlyTesting,
+            skipTesting: skipTesting,
+            onlyTestConfiguration: onlyTestConfiguration,
+            skipTestConfiguration: skipTestConfiguration,
             additionalParameters: additionalParameters
         )
     }

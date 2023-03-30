@@ -93,6 +93,11 @@ final class XcodeBuildControllerTests: TuistUnitTestCase {
             resultBundlePath: nil,
             arguments: [],
             retryCount: 0,
+            testPlan: nil,
+            onlyTesting: [],
+            skipTesting: [],
+            onlyTestConfiguration: [],
+            skipTestConfiguration: [],
             additionalParameters: []
         )
 
@@ -133,6 +138,11 @@ final class XcodeBuildControllerTests: TuistUnitTestCase {
             resultBundlePath: nil,
             arguments: [],
             retryCount: 0,
+            testPlan: nil,
+            onlyTesting: [],
+            skipTesting: [],
+            onlyTestConfiguration: [],
+            skipTestConfiguration: [],
             additionalParameters: []
         )
 
@@ -173,6 +183,11 @@ final class XcodeBuildControllerTests: TuistUnitTestCase {
             resultBundlePath: nil,
             arguments: [],
             retryCount: 0,
+            testPlan: nil,
+            onlyTesting: [],
+            skipTesting: [],
+            onlyTestConfiguration: [],
+            skipTestConfiguration: [],
             additionalParameters: []
         )
 
@@ -213,6 +228,11 @@ final class XcodeBuildControllerTests: TuistUnitTestCase {
             resultBundlePath: resultBundlePath,
             arguments: [],
             retryCount: 0,
+            testPlan: nil,
+            onlyTesting: [],
+            skipTesting: [],
+            onlyTestConfiguration: [],
+            skipTestConfiguration: [],
             additionalParameters: []
         )
 
@@ -250,6 +270,11 @@ final class XcodeBuildControllerTests: TuistUnitTestCase {
             resultBundlePath: resultBundlePath,
             arguments: [],
             retryCount: 0,
+            testPlan: nil,
+            onlyTesting: [],
+            skipTesting: [],
+            onlyTestConfiguration: [],
+            skipTestConfiguration: [],
             additionalParameters: additionalParameters
         )
 

@@ -80,6 +80,11 @@ public final class XcodeBuildController: XcodeBuildControlling {
         resultBundlePath: AbsolutePath?,
         arguments: [XcodeBuildArgument],
         retryCount: Int,
+        testPlan: String?,
+        onlyTesting: [String],
+        skipTesting: [String],
+        onlyTestConfiguration: [String],
+        skipTestConfiguration: [String],
         additionalParameters: [String]
     ) -> AsyncThrowingStream<SystemEvent<XcodeBuildOutput>, Error> {
         var command = ["/usr/bin/xcrun", "xcodebuild"]
@@ -120,6 +125,22 @@ public final class XcodeBuildController: XcodeBuildControlling {
         // Result bundle path
         if let resultBundlePath = resultBundlePath {
             command.append(contentsOf: ["-resultBundlePath", resultBundlePath.pathString])
+        }
+
+        for test in onlyTesting {
+            command.append(contentsOf: ["-only-testing", test])
+        }
+
+        for test in skipTesting {
+            command.append(contentsOf: ["-only-testing", test])
+        }
+
+        for configuration in onlyTestConfiguration {
+            command.append(contentsOf: ["-only-test-configuration", configuration])
+        }
+
+        for configuration in skipTestConfiguration {
+            command.append(contentsOf: ["-skip-test-configuration", configuration])
         }
 
         command.append(contentsOf: additionalParameters)

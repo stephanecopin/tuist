@@ -67,6 +67,40 @@ struct TestCommand: AsyncParsableCommand {
 
     @Option(
         name: .long,
+        help: "The test plan to run."
+    )
+    var testPlan: String?
+
+    @Option(
+        name: .long,
+        parsing: .upToNextOption,
+        help: "The list of test identifiers you want to test. Takes precedence over --only-testing"
+    )
+    var onlyTesting: [String] = []
+
+    @Option(
+        name: .long,
+        parsing: .upToNextOption,
+        help: "The list of test identifiers you want to skip testing."
+    )
+    var skipTesting: [String] = []
+
+    @Option(
+        name: .long,
+        parsing: .upToNextOption,
+        help: "The list of configurations you want to test. Takes precedence over --only-testing"
+    )
+    var onlyTestConfiguration: [String] = []
+
+    @Option(
+        name: .long,
+        parsing: .upToNextOption,
+        help: "The list of configurations you want to skip testing. Takes precedence over --skip-test-configuration"
+    )
+    var skipTestConfiguration: [String] = []
+
+    @Option(
+        name: .long,
         parsing: .remaining,
         help: "List of options to pass through to the xcodebuild invocation."
     )
@@ -96,6 +130,11 @@ struct TestCommand: AsyncParsableCommand {
                 )
             },
             retryCount: retryCount,
+            testPlan: testPlan,
+            onlyTesting: onlyTesting,
+            skipTesting: skipTesting,
+            onlyTestConfiguration: onlyTestConfiguration,
+            skipTestConfiguration: skipTestConfiguration,
             additionalParameters: additionalParameters
         )
     }
